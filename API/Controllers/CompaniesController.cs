@@ -61,7 +61,7 @@ namespace LeadManagerPro.Controllers
 
         // POST: api/Companies
         [HttpPost]
-        public async Task<ActionResult<CompanyDto>> CreateCompany(CompanyCreateDto companyDto)
+        public async Task<ActionResult<CompanyDto>> CreateCompany(CompanyDto companyDto)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace LeadManagerPro.Controllers
 
         // PUT: api/Companies/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCompany(int id, CompanyUpdateDto companyDto)
+        public async Task<IActionResult> UpdateCompany(int id, CompanyDto companyDto)
         {
             try
             {

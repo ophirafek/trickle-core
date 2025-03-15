@@ -9,8 +9,8 @@ namespace LeadManagerPro.Services
     {
         Task<IEnumerable<CompanyDto>> GetCompaniesAsync();
         Task<CompanyDto> GetCompanyByIdAsync(int id);
-        Task<CompanyDto> CreateCompanyAsync(CompanyCreateDto companyDto);
-        Task UpdateCompanyAsync(int id, CompanyUpdateDto companyDto);
+        Task<CompanyDto> CreateCompanyAsync(CompanyDto companyDto);
+        Task UpdateCompanyAsync(int id, CompanyDto companyDto);
         Task DeleteCompanyAsync(int id);
         Task<bool> CompanyExistsAsync(int id);
         Task<ContactDto> AddContactAsync(int companyId, ContactCreateDto contactDto);

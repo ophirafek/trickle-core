@@ -114,30 +114,31 @@ namespace LeadManagerPro.Services
             }
         }
 
-        public async Task<CompanyDto> CreateCompanyAsync(CompanyCreateDto companyDto)
+        public async Task<CompanyDto> CreateCompanyAsync(CompanyDto companyDto)
         {
             try
             {
                 var company = new Company
                 {
-                    Name = companyDto.Name,
-                    Industry = companyDto.Industry,
-                    Size = companyDto.Size,
-                    Location = companyDto.Location,
-                    Website = companyDto.Website,
-                    Status = companyDto.Status,
-                    StreetAddress = companyDto.StreetAddress,
-                    Suite = companyDto.Suite,
-                    City = companyDto.City,
-                    StateProvince = companyDto.StateProvince,
-                    PostalCode = companyDto.PostalCode,
-                    Country = companyDto.Country,
-                    BillingStreet = companyDto.BillingStreet,
-                    BillingCity = companyDto.BillingCity,
-                    BillingPostalCode = companyDto.BillingPostalCode,
-                    LinkedInProfile = companyDto.LinkedInProfile,
+                    // ID is auto-generated, so we don't set it here
+                    Name = companyDto.Name, // This is required
+                    Industry = companyDto.Industry ?? string.Empty,
+                    Size = companyDto.Size ?? string.Empty,
+                    Location = companyDto.Location ?? string.Empty,
+                    Website = companyDto.Website ?? string.Empty,
+                    Status = companyDto.Status ?? "Active",
+                    StreetAddress = companyDto.StreetAddress ?? string.Empty,
+                    Suite = companyDto.Suite ?? string.Empty,
+                    City = companyDto.City ?? string.Empty, // Handle null City
+                    StateProvince = companyDto.StateProvince ?? string.Empty,
+                    PostalCode = companyDto.PostalCode ?? string.Empty,
+                    Country = companyDto.Country ?? string.Empty,
+                    BillingStreet = companyDto.BillingStreet ?? string.Empty,
+                    BillingCity = companyDto.BillingCity ?? string.Empty,
+                    BillingPostalCode = companyDto.BillingPostalCode ?? string.Empty,
+                    LinkedInProfile = companyDto.LinkedInProfile ?? string.Empty,
                     FoundingYear = companyDto.FoundingYear,
-                    Description = companyDto.Description,
+                    Description = companyDto.Description ?? string.Empty,
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -178,7 +179,7 @@ namespace LeadManagerPro.Services
             }
         }
 
-        public async Task UpdateCompanyAsync(int id, CompanyUpdateDto companyDto)
+        public async Task UpdateCompanyAsync(int id, CompanyDto companyDto)
         {
             try
             {
