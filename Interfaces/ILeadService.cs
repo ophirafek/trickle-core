@@ -7,6 +7,7 @@ namespace LeadManagerPro.Services
     public interface ILeadService
     {
         Task<IEnumerable<LeadDto>> GetLeadsAsync();
+        Task<IEnumerable<LeadDto>> GetLeadsByCompanyAsync(int companyId);
         Task<LeadDto> GetLeadByIdAsync(int id);
         Task<LeadDto> CreateLeadAsync(LeadCreateDto leadDto);
         Task UpdateLeadAsync(int id, LeadUpdateDto leadDto);

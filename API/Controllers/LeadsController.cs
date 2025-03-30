@@ -38,6 +38,22 @@ namespace LeadManagerPro.Controllers
             }
         }
 
+        // GET: api/Leads/Company/5
+        [HttpGet("Company/{companyId}")]
+        public async Task<ActionResult<IEnumerable<LeadDto>>> GetLeadsByCompany(int companyId)
+        {
+            try
+            {
+                var leads = await _leadService.GetLeadsByCompanyAsync(companyId);
+                return Ok(leads);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting leads for company {CompanyId}", companyId);
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
         // GET: api/Leads/5
         [HttpGet("{id}")]
         public async Task<ActionResult<LeadDto>> GetLead(int id)
