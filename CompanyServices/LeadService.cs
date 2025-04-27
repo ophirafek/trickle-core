@@ -150,9 +150,9 @@ namespace LeadManagerPro.Services
                     Probability = leadDto.Probability,
                     Owner = leadDto.Owner,
                     Source = leadDto.Source,
-                    ExpectedCloseDate = leadDto.ExpectedCloseDate,
-                    Description = leadDto.Description,
-                    NextSteps = leadDto.NextSteps,
+                    ExpectedCloseDate = leadDto.ExpectedCloseDate ?? DateTime.UtcNow,
+                    Description = leadDto.Description ?? "",
+                    NextSteps = leadDto.NextSteps ?? "",
                     CreatedAt = DateTime.UtcNow
                 };
 

@@ -13,16 +13,16 @@ namespace LeadManagerPro.DTOs
         public string Name { get; set; }
 
         [StringLength(100)]
-        public string Industry { get; set; }
+        public string? Industry { get; set; }
 
         [StringLength(50)]
-        public string Size { get; set; }
+        public string? Size { get; set; }
 
         [StringLength(200)]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         [StringLength(255)]
-        public string Website { get; set; }
+        public string? Website { get; set; }
 
         [StringLength(50)]
         public string? Status { get; set; } = "Active";
@@ -61,13 +61,16 @@ namespace LeadManagerPro.DTOs
 
         public string? Description { get; set; }
 
+        public string? RegistrationNumber { get; set; }  // Added field
+        public string? DunsNumber { get; set; }         // Added field
+
         public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
 
-        public ICollection<ContactDto> Contacts { get; set; }
+        public ICollection<ContactDto>? Contacts { get; set; }
 
-        public ICollection<NoteDto> Notes { get; set; }
+        public ICollection<NoteDto>? Notes { get; set; }
     }
 
     public class ContactDto

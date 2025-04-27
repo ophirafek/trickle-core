@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CompanyServices;
 using LeadManagerPro.DTOs;
 using LeadManagerPro.Services;
 using Microsoft.AspNetCore.Http;
@@ -14,11 +15,13 @@ namespace LeadManagerPro.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly ICompanyService _companyService;
+        private readonly IImportService _importService;
         private readonly ILogger<CompaniesController> _logger;
 
-        public CompaniesController(ICompanyService companyService, ILogger<CompaniesController> logger)
+        public CompaniesController(ICompanyService companyService, IImportService importService, ILogger<CompaniesController> logger)
         {
             _companyService = companyService;
+            _importService = importService;
             _logger = logger;
         }
 
@@ -171,7 +174,20 @@ namespace LeadManagerPro.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
-
+        [HttpPost("import")]
+        public async Task<ActionResult<IEnumerable<ImportResult>>> ImportCompanies(List<CompanyDto> companies)
+        {
+            try
+            {
+                IEnumerable<ImportResult> ret = await _importService.ImportCompaniesAsync(companies);
+                return Ok(ret);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error importing companies");
+                return StatusCode(500, "An error occurred during import");
+            }
+        }
         // POST: api/Companies/{companyId}/Notes
         [HttpPost("{companyId}/notes")]
         public async Task<ActionResult<NoteDto>> AddNote(int companyId, NoteCreateDto noteDto)

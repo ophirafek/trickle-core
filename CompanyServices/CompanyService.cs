@@ -84,6 +84,8 @@ namespace LeadManagerPro.Services
                     LinkedInProfile = company.LinkedInProfile,
                     FoundingYear = company.FoundingYear,
                     Description = company.Description,
+                    RegistrationNumber = company.RegistrationNumber,
+                    DunsNumber = company.DunsNumber,
                     CreatedAt = company.CreatedAt,
                     UpdatedAt = company.UpdatedAt,
                     Contacts = company.Contacts?.Select(c => new ContactDto
@@ -139,6 +141,9 @@ namespace LeadManagerPro.Services
                     LinkedInProfile = companyDto.LinkedInProfile ?? string.Empty,
                     FoundingYear = companyDto.FoundingYear,
                     Description = companyDto.Description ?? string.Empty,
+                    RegistrationNumber = companyDto.RegistrationNumber ?? string.Empty,  // Added field
+                    DunsNumber = companyDto.DunsNumber ?? string.Empty,                 // Added field
+
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -166,6 +171,8 @@ namespace LeadManagerPro.Services
                     LinkedInProfile = company.LinkedInProfile,
                     FoundingYear = company.FoundingYear,
                     Description = company.Description,
+                    RegistrationNumber = company.RegistrationNumber,  // Added field
+                    DunsNumber = company.DunsNumber,                 // Added field
                     CreatedAt = company.CreatedAt,
                     UpdatedAt = company.UpdatedAt
                 };
@@ -208,6 +215,9 @@ namespace LeadManagerPro.Services
                 company.LinkedInProfile = companyDto.LinkedInProfile;
                 company.FoundingYear = companyDto.FoundingYear;
                 company.Description = companyDto.Description;
+                company.RegistrationNumber = companyDto.RegistrationNumber;  // Added field
+                company.DunsNumber = companyDto.DunsNumber;                 // Added field
+
                 company.UpdatedAt = DateTime.UtcNow;
 
                 _context.Entry(company).State = EntityState.Modified;

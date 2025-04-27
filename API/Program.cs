@@ -1,3 +1,4 @@
+using CompanyServices;
 using LeadManagerPro.Data;
 using LeadManagerPro.Services;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
+builder.Services.AddScoped<IImportService, ImportService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>

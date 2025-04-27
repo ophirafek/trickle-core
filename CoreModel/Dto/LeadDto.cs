@@ -15,8 +15,8 @@ namespace LeadManagerPro.DTOs
         public string Owner { get; set; }
         public string Source { get; set; }
         public DateTime? ExpectedCloseDate { get; set; }
-        public string Description { get; set; }
-        public string NextSteps { get; set; }
+        public string? Description { get; set; }
+        public string? NextSteps { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
@@ -40,16 +40,16 @@ namespace LeadManagerPro.DTOs
         public int Probability { get; set; }
 
         [StringLength(100)]
-        public string Owner { get; set; }
+        public string? Owner { get; set; }
 
         [StringLength(50)]
-        public string Source { get; set; }
+        public string? Source { get; set; }
 
         public DateTime? ExpectedCloseDate { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public string NextSteps { get; set; }
+        public string? NextSteps { get; set; }
     }
 
     public class LeadUpdateDto : LeadCreateDto

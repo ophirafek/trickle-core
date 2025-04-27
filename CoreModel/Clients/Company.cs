@@ -13,57 +13,61 @@ namespace LeadManagerPro.Models
         public string Name { get; set; }
 
         [StringLength(100)]
-        public string Industry { get; set; }
+        public string? Industry { get; set; }
 
         [StringLength(50)]
-        public string Size { get; set; }
+        public string? Size { get; set; }
 
         [StringLength(200)]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         [StringLength(255)]
-        public string Website { get; set; }
+        public string? Website { get; set; }
 
         [StringLength(50)]
-        public string Status { get; set; } = "Active";
+        public string? Status { get; set; } = "Active";
 
         // Address information
         [StringLength(200)]
-        public string StreetAddress { get; set; }
+        public string? StreetAddress { get; set; }
 
         [StringLength(50)]
-        public string Suite { get; set; }
+        public string? Suite { get; set; }
 
         [StringLength(100)]
-        public string City { get; set; }
+        public string? City { get; set; }
 
         [StringLength(100)]
-        public string StateProvince { get; set; }
+        public string? StateProvince { get; set; }
 
         [StringLength(20)]
-        public string PostalCode { get; set; }
+        public string? PostalCode { get; set; }
 
         [StringLength(100)]
-        public string Country { get; set; }
+        public string? Country { get; set; }
 
         // Billing Address (if different)
         [StringLength(200)]
-        public string BillingStreet { get; set; }
+        public string? BillingStreet { get; set; }
 
         [StringLength(100)]
-        public string BillingCity { get; set; }
+        public string? BillingCity { get; set; }
 
         [StringLength(20)]
-        public string BillingPostalCode { get; set; }
+        public string? BillingPostalCode { get; set; }
 
         // Additional information
         [StringLength(255)]
-        public string LinkedInProfile { get; set; }
+        public string? LinkedInProfile { get; set; }
 
         public int? FoundingYear { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
+        [StringLength(50)]
+        public string? RegistrationNumber { get; set; }
 
+        [StringLength(50)]
+        public string? DunsNumber { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
