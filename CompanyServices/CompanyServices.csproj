@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Base\Base.csproj" />
     <ProjectReference Include="..\CoreModel\CoreModel.csproj" />
     <ProjectReference Include="..\DbContext\DbContext.csproj" />
     <ProjectReference Include="..\Interfaces\Interfaces.csproj" />

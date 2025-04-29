@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Base;
 using CompanyServices;
 using LeadManagerPro.Data;
 using LeadManagerPro.DTOs;
 using LeadManagerPro.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace LeadManagerPro.Services
@@ -17,17 +19,20 @@ namespace LeadManagerPro.Services
         private readonly ApplicationDbContext _context;
         private readonly ICompanyService _companyService;
         private readonly ILeadService _leadService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
         private readonly ILogger<ImportService> _logger;
 
         public ImportService(
             ApplicationDbContext context,
             ICompanyService companyService,
             ILeadService leadService,
+            IStringLocalizer<SharedResource> localizer,
             ILogger<ImportService> logger)
         {
             _context = context;
             _companyService = companyService;
             _leadService = leadService;
+            _localizer = localizer;
             _logger = logger;
         }
 
@@ -71,7 +76,7 @@ namespace LeadManagerPro.Services
                         await _leadService.CreateLeadAsync(leadCreateDto);
 
                         result.Status = 0; // New company created
-                        result.Description = "Company created successfully";
+                        result.Description = _localizer["CompanyCreatedSuccessfully"];
                     }
                     else
                     {
@@ -99,12 +104,12 @@ namespace LeadManagerPro.Services
                             await _leadService.CreateLeadAsync(leadCreateDto);
 
                             result.Status = 1; // Company exists + new lead
-                            result.Description = "Existing company, new lead created";
+                            result.Description = _localizer["ExistingCompanyLeadCreated"];
                         }
                         else
                         {
                             result.Status = 2; // Both exist
-                            result.Description = "Company and lead already exist";
+                            result.Description = _localizer["CompanyAndLeadExist"];
                         }
                     }
 
