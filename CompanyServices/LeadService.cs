@@ -2,23 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LeadManagerPro.Data;
-using LeadManagerPro.DTOs;
-using LeadManagerPro.Models;
+using Interfaces;
+using ACIA.Data;
+using ACIA.DTOs;
+using ACIA.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace LeadManagerPro.Services
+namespace ACIA.Services
 {
     public class LeadService : ILeadService
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<LeadService> _logger;
+        private readonly IIdPoolService _poolService;
 
-        public LeadService(ApplicationDbContext context, ILogger<LeadService> logger)
+        public LeadService(ApplicationDbContext context, ILogger<LeadService> logger, IIdPoolService poolService)
         {
             _context = context;
             _logger = logger;
+            this._poolService = poolService;
         }
 
         public async Task<IEnumerable<LeadDto>> GetLeadsAsync()
@@ -32,7 +35,7 @@ namespace LeadManagerPro.Services
                         Id = l.Id,
                         Title = l.Title,
                         CompanyId = l.CompanyId,
-                        CompanyName = l.Company.Name,
+                        CompanyName = l.Company.RegistrationName,
                         Status = l.Status,
                         Value = l.Value,
                         Probability = l.Probability,
@@ -67,7 +70,7 @@ namespace LeadManagerPro.Services
                         Id = l.Id,
                         Title = l.Title,
                         CompanyId = l.CompanyId,
-                        CompanyName = l.Company.Name,
+                        CompanyName = l.Company.RegistrationName,
                         Status = l.Status,
                         Value = l.Value,
                         Probability = l.Probability,
@@ -108,7 +111,7 @@ namespace LeadManagerPro.Services
                     Id = lead.Id,
                     Title = lead.Title,
                     CompanyId = lead.CompanyId,
-                    CompanyName = lead.Company.Name,
+                    CompanyName = lead.Company.RegistrationName,
                     Status = lead.Status,
                     Value = lead.Value,
                     Probability = lead.Probability,
@@ -143,13 +146,14 @@ namespace LeadManagerPro.Services
 
                 var lead = new Lead
                 {
+                    Id = await _poolService.GetNextIdAsync(IIdPoolService.IdPoolType.Lead),
                     Title = leadDto.Title,
                     CompanyId = leadDto.CompanyId,
                     Status = leadDto.Status,
                     Value = leadDto.Value,
                     Probability = leadDto.Probability,
-                    Owner = leadDto.Owner,
-                    Source = leadDto.Source,
+                    Owner = leadDto.Owner ?? "",
+                    Source = leadDto.Source ?? "",
                     ExpectedCloseDate = leadDto.ExpectedCloseDate ?? DateTime.UtcNow,
                     Description = leadDto.Description ?? "",
                     NextSteps = leadDto.NextSteps ?? "",
@@ -167,7 +171,7 @@ namespace LeadManagerPro.Services
                     Id = lead.Id,
                     Title = lead.Title,
                     CompanyId = lead.CompanyId,
-                    CompanyName = company.Name,
+                    CompanyName = company.RegistrationName,
                     Status = lead.Status,
                     Value = lead.Value,
                     Probability = lead.Probability,

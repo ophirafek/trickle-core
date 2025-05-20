@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using LeadManagerPro.DTOs;
-using LeadManagerPro.Models;
+using ACIA.DTOs;
+using ACIA.Models;
 
-namespace LeadManagerPro.Services
+namespace ACIA.Services
 {
     public interface ICompanyService
     {

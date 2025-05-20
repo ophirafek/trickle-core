@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CompanyServices;
-using LeadManagerPro.DTOs;
-using LeadManagerPro.Services;
+using ACIA.DTOs;
+using ACIA.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace LeadManagerPro.Controllers
+namespace ACIA.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

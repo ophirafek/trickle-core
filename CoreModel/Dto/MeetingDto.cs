@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace LeadManagerPro.DTOs
+namespace ACIA.DTOs
 {
     public class MeetingDto
     {

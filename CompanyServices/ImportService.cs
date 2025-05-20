@@ -5,14 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Base;
 using CompanyServices;
-using LeadManagerPro.Data;
-using LeadManagerPro.DTOs;
-using LeadManagerPro.Models;
+using ACIA.Data;
+using ACIA.DTOs;
+using ACIA.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
-namespace LeadManagerPro.Services
+namespace ACIA.Services
 {
     public class ImportService : IImportService
     {
@@ -46,7 +46,7 @@ namespace LeadManagerPro.Services
                 {
                     var result = new ImportResult
                     {
-                        CompanyName = companyDto.Name
+                        CompanyName = companyDto.RegistrationName
                     };
 
                     // Check if company exists by registration number
@@ -65,10 +65,11 @@ namespace LeadManagerPro.Services
 
                         var leadCreateDto = new LeadCreateDto
                         {
-                            Title = companyDto.Name,
+                            Title = companyDto.RegistrationName,
                             CompanyId = companyId,
                             Value = 0,
                             Probability = 0,
+                            Owner = "",
                             Source = "Import",
                             Description = ""
                         };
@@ -92,7 +93,7 @@ namespace LeadManagerPro.Services
                             // Create a new lead for existing company
                             var leadCreateDto = new LeadCreateDto
                             {
-                                Title = companyDto.Name,
+                                Title = companyDto.RegistrationName,
                                 CompanyId = companyId,
                                 Value =  0,
                                 Probability = 0,
@@ -117,12 +118,12 @@ namespace LeadManagerPro.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error importing company {CompanyName}", companyDto.Name);
+                    _logger.LogError(ex, "Error importing company {CompanyName}", companyDto.RegistrationName);
 
                     results.Add(new ImportResult
                     {
                         Status = 3, // Error
-                        CompanyName = companyDto.Name,
+                        CompanyName = companyDto.RegistrationName,
                         ErrorMessage = ex.Message
                     });
                 }

@@ -1,9 +1,9 @@
-﻿using LeadManagerPro.Models;
+﻿using ACIA.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace LeadManagerPro.Data
+namespace ACIA.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -16,6 +16,10 @@ namespace LeadManagerPro.Data
         public DbSet<Lead> Leads { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<MeetingAttendee> MeetingAttendees { get; set; }
+        // Addition to DbContext/ApplicationDbContext.cs
+        public DbSet<Assignment> Assignments { get; set; }
+        public DbSet<InsuredCompany> InsuredCompanies { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -54,6 +58,19 @@ namespace LeadManagerPro.Data
                 .WithOne(a => a.Meeting)
                 .HasForeignKey(a => a.MeetingId)
                 .OnDelete(DeleteBehavior.Cascade);
+            // Configure Assignment relationship with Company
+            modelBuilder.Entity<Assignment>()
+                .HasOne(a => a.Company)
+                .WithMany()
+                .HasForeignKey(a => a.CompanyID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure InsuredCompany relationship with Company
+            modelBuilder.Entity<InsuredCompany>()
+                .HasOne(i => i.Company)
+                .WithMany()
+                .HasForeignKey(i => i.CompanyID)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

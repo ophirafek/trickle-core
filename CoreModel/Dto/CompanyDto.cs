@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace LeadManagerPro.DTOs
+namespace ACIA.DTOs
 {
     public class CompanyDto
     {
@@ -10,28 +10,30 @@ namespace LeadManagerPro.DTOs
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string RegistrationNumber { get; set; }  // Added field
+        public string? DunsNumber { get; set; }         // Added field
+        public string? VATNumber { get; set; }         // Added field
+        public int? IdTypeCode { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string RegistrationName { get; set; }
 
         [StringLength(100)]
-        public string? Industry { get; set; }
-
-        [StringLength(50)]
-        public string? Size { get; set; }
-
-        [StringLength(200)]
-        public string? Location { get; set; }
+        public string? TradeName { get; set; }
+        [StringLength(100)]
+        public string? EnglishName { get; set; }
+        public int? CompanyStatusCode { get; set; }
+        public int? BusinessFieldCode { get; set; }
+        public int? EntityTypeCode { get; set; }
+        public int? FoundingYear { get; set; }
+        public int? CountryCode { get; set; }
 
         [StringLength(255)]
         public string? Website { get; set; }
 
-        [StringLength(50)]
-        public string? Status { get; set; } = "Active";
 
         [StringLength(200)]
         public string? StreetAddress { get; set; }
-
-        [StringLength(50)]
-        public string? Suite { get; set; }
 
         [StringLength(100)]
         public string? City { get; set; }
@@ -42,35 +44,34 @@ namespace LeadManagerPro.DTOs
         [StringLength(20)]
         public string? PostalCode { get; set; }
 
-        [StringLength(100)]
-        public string? Country { get; set; }
-
-        [StringLength(200)]
-        public string? BillingStreet { get; set; }
-
-        [StringLength(100)]
-        public string? BillingCity { get; set; }
-
         [StringLength(20)]
-        public string? BillingPostalCode { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? MobileNumber { get; set; }
+        public string? FaxNumber { get; set; }
+        public string? EMailAddress { get; set; }
+        
+        public string? Remarks{ get; set; }
 
-        [StringLength(255)]
-        public string? LinkedInProfile { get; set; }
+        public DateTime? LastReportDate { get; set; }
+        public string? LastReportName { get; set; }
 
-        public int? FoundingYear { get; set; }
-
-        public string? Description { get; set; }
-
-        public string? RegistrationNumber { get; set; }  // Added field
-        public string? DunsNumber { get; set; }         // Added field
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? OpeningEffectiveDate { get; set; }
+        public DateTime? ClosingEffectiveDate { get; set; }
+        public DateTime? OpeningRegDate { get; set; }
+        public DateTime? ClosingRegDate { get; set; }
+        public string? OpeningRef{ get; set; }
+        public string? ClosingRef{ get; set; }
+        public int? AssignedTeamMemberId { get; set; }
+        public string? AssignedTeamMemberName { get; set; }
+        public InsuredCompanyDto? InsuredDetails { get; set; }
+        public bool IsInsured { get;set; }
+        public bool IsDebtor { get; set; }
+        public bool IsPotentialInsured { get; set; }
 
         public ICollection<ContactDto>? Contacts { get; set; }
 
         public ICollection<NoteDto>? Notes { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class ContactDto

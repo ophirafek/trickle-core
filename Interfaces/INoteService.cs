@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using LeadManagerPro.DTOs;
+using ACIA.DTOs;
 
-namespace LeadManagerPro.Services
+namespace ACIA.Services
 {
     public interface INoteService
     {

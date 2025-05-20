@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using LeadManagerPro.Data;
-using LeadManagerPro.DTOs;
-using LeadManagerPro.Models;
+using ACIA.Data;
+using ACIA.DTOs;
+using ACIA.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace LeadManagerPro.Services
+namespace ACIA.Services
 {
     public class ContactService : IContactService
     {

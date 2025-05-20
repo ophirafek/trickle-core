@@ -2,45 +2,133 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LeadManagerPro.Data;
-using LeadManagerPro.DTOs;
-using LeadManagerPro.Models;
+using Interfaces;
+using ACIA.Data;
+using ACIA.DTOs;
+using ACIA.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
-namespace LeadManagerPro.Services
+namespace ACIA.Services
 {
     public class CompanyService : ICompanyService
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<CompanyService> _logger;
+        private IIdPoolService _poolService;
 
-        public CompanyService(ApplicationDbContext context, ILogger<CompanyService> logger)
+        public CompanyService(ApplicationDbContext context, ILogger<CompanyService> logger, IIdPoolService poolService)
         {
             _context = context;
             _logger = logger;
+            _poolService = poolService;
         }
 
         public async Task<IEnumerable<CompanyDto>> GetCompaniesAsync()
         {
             try
             {
-                var companies = await _context.Companies
-                    .Select(c => new CompanyDto
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        Industry = c.Industry,
-                        Size = c.Size,
-                        Location = c.Location,
-                        Website = c.Website,
-                        Status = c.Status,
-                        CreatedAt = c.CreatedAt,
-                        UpdatedAt = c.UpdatedAt
-                    })
-                    .ToListAsync();
+                var companies = await (
+                 from company in _context.Companies
+                     .Include(c => c.Contacts)
+                     .Include(c => c.Notes)
+                 join insured in _context.InsuredCompanies
+                     on company.Id equals (int)insured.CompanyID into insuredJoin
+                 from insuredCompany in insuredJoin.DefaultIfEmpty()
+                 where company.IsActive &&
+                       company.OpeningEffectiveDate <= DateTime.UtcNow.Date && company.ClosingEffectiveDate > DateTime.UtcNow.Date &&
+                       (insuredCompany == null || insuredCompany.ActiveFlag == 1)
+                 select new
+                 {
+                     Company = company,
+                     InsuredCompany = insuredCompany
+                 })
+                 .ToListAsync();
 
-                return companies;
+                var companiesDto = companies
+                    .Select(result =>
+                    {
+
+                        var c = result.Company;
+                        var insuredCompany = result.InsuredCompany;
+
+                        var companyDto = new CompanyDto
+                        {
+                            Id = c.Id,
+                            IdTypeCode = c.IdTypeCode,
+                            RegistrationNumber = c.RegistrationNumber,
+                            DunsNumber = c.DunsNumber,
+                            VATNumber = c.VATNumber,
+                            RegistrationName = c.RegistrationName,
+                            TradeName = c.TradeName,
+                            EnglishName = c.EnglishName,
+                            CompanyStatusCode = c.CompanyStatusCode,
+                            BusinessFieldCode = c.BusinessFieldCode,
+                            EntityTypeCode = c.EntityTypeCode,
+                            FoundingYear = c.FoundingYear,
+                            CountryCode = c.CountryCode,
+                            Website = c.Website,
+                            StreetAddress = c.StreetAddress,
+                            City = c.City,
+                            StateProvince = c.StateProvince,
+                            PostalCode = c.PostalCode,
+                            PhoneNumber = c.PhoneNumber,
+                            MobileNumber = c.MobileNumber,
+                            FaxNumber = c.FaxNumber,
+                            EMailAddress = c.EMailAddress,
+                            Remarks = c.Remarks,
+                            LastReportDate = c.LastReportDate,
+                            LastReportName = c.LastReportName,
+                            OpeningEffectiveDate = c.OpeningEffectiveDate,
+                            ClosingEffectiveDate = c.ClosingEffectiveDate,
+                            OpeningRegDate = c.OpeningRegDate,
+                            ClosingRegDate = c.ClosingRegDate,
+                            OpeningRef = c.OpeningRef,
+                            ClosingRef = c.ClosingRef,
+                            IsInsured = insuredCompany != null,
+
+                            // Map related collections
+                            Contacts = c.Contacts?.Select(c1 => new ContactDto
+                            {
+                                Id = c1.Id,
+                                Name = c1.Name,
+                                JobTitle = c1.JobTitle,
+                                Email = c1.Email,
+                                Phone = c1.Phone,
+                                CompanyId = c1.CompanyId
+                            }).ToList(),
+
+                            Notes = c.Notes?.Select(n => new NoteDto
+                            {
+                                Id = n.Id,
+                                Title = n.Title,
+                                Content = n.Content,
+                                CreatedAt = n.CreatedAt,
+                                CompanyId = n.CompanyId
+                            }).ToList()
+                        };
+                        if (insuredCompany != null)
+                        {
+                            companyDto.InsuredDetails = new InsuredCompanyDto
+                            {
+                                ID = insuredCompany.ID,
+                                CompanyID = insuredCompany.CompanyID,
+                                CompanyName = c.RegistrationName,
+                                StatusCode = insuredCompany.StatusCode,
+                                SizeCode = insuredCompany.SizeCode,
+                                InsuranceEntryDate = insuredCompany.InsuranceEntryDate,
+                                OpeningEffecDate = insuredCompany.OpeningEffecDate,
+                                ClosingEffecDate = insuredCompany.ClosingEffecDate,
+                                OpeningRegDate = insuredCompany.OpeningRegDate,
+                                ClosingRegDate = insuredCompany.ClosingRegDate,
+                                OpeningRef = insuredCompany.OpeningRef,
+                                ClosingRef = insuredCompany.ClosingRef,
+                                ActiveFlag = insuredCompany.ActiveFlag
+                            };
+                        }
+                        return companyDto; }).ToList();
+                return companiesDto;
             }
             catch (Exception ex)
             {
@@ -52,52 +140,78 @@ namespace LeadManagerPro.Services
         public async Task<CompanyDto> GetCompanyByIdAsync(int id)
         {
             try
-            {
-                var company = await _context.Companies
-                    .Include(c => c.Contacts)
-                    .Include(c => c.Notes)
-                    .FirstOrDefaultAsync(c => c.Id == id);
+            { 
+                 var result = await (
+                 from company in _context.Companies
+                     .Include(c => c.Contacts)
+                     .Include(c => c.Notes)
+                 join insured in _context.InsuredCompanies
+                     on company.Id equals (int)insured.CompanyID into insuredJoin
+                 from insuredCompany in insuredJoin.DefaultIfEmpty()
+                 where company.Id == id &&
+                       company.IsActive &&
+                       company.OpeningEffectiveDate <= DateTime.UtcNow.Date && company.ClosingEffectiveDate > DateTime.UtcNow.Date &&
+                       (insuredCompany == null || insuredCompany.ActiveFlag == 1)
+                 select new
+                 {
+                     Company = company,
+                     InsuredCompany = insuredCompany
+                 })
+                 .FirstOrDefaultAsync();
 
-                if (company == null)
+                if (result == null)
                 {
                     return null;
                 }
-
+                var c = result.Company;
+                var insuredCompanyResult = result.InsuredCompany;
                 var companyDto = new CompanyDto
                 {
-                    Id = company.Id,
-                    Name = company.Name,
-                    Industry = company.Industry,
-                    Size = company.Size,
-                    Location = company.Location,
-                    Website = company.Website,
-                    Status = company.Status,
-                    StreetAddress = company.StreetAddress,
-                    Suite = company.Suite,
-                    City = company.City,
-                    StateProvince = company.StateProvince,
-                    PostalCode = company.PostalCode,
-                    Country = company.Country,
-                    BillingStreet = company.BillingStreet,
-                    BillingCity = company.BillingCity,
-                    BillingPostalCode = company.BillingPostalCode,
-                    LinkedInProfile = company.LinkedInProfile,
-                    FoundingYear = company.FoundingYear,
-                    Description = company.Description,
-                    RegistrationNumber = company.RegistrationNumber,
-                    DunsNumber = company.DunsNumber,
-                    CreatedAt = company.CreatedAt,
-                    UpdatedAt = company.UpdatedAt,
-                    Contacts = company.Contacts?.Select(c => new ContactDto
+                    Id = c.Id,
+                    IdTypeCode = c.IdTypeCode,
+                    RegistrationNumber = c.RegistrationNumber,
+                    DunsNumber = c.DunsNumber,
+                    VATNumber = c.VATNumber,
+                    RegistrationName = c.RegistrationName,
+                    TradeName = c.TradeName,
+                    EnglishName = c.EnglishName,
+                    CompanyStatusCode = c.CompanyStatusCode,
+                    BusinessFieldCode = c.BusinessFieldCode,
+                    EntityTypeCode = c.EntityTypeCode,
+                    FoundingYear = c.FoundingYear,
+                    CountryCode = c.CountryCode,
+                    Website = c.Website,
+                    StreetAddress = c.StreetAddress,
+                    City = c.City,
+                    StateProvince = c.StateProvince,
+                    PostalCode = c.PostalCode,
+                    PhoneNumber = c.PhoneNumber,
+                    MobileNumber = c.MobileNumber,
+                    FaxNumber = c.FaxNumber,
+                    EMailAddress = c.EMailAddress,
+                    Remarks = c.Remarks,
+                    LastReportDate = c.LastReportDate,
+                    LastReportName = c.LastReportName,
+                    OpeningEffectiveDate = c.OpeningEffectiveDate,
+                    ClosingEffectiveDate = c.ClosingEffectiveDate,
+                    OpeningRegDate = c.OpeningRegDate,
+                    ClosingRegDate = c.ClosingRegDate,
+                    OpeningRef = c.OpeningRef,
+                    ClosingRef = c.ClosingRef,
+                    IsInsured = insuredCompanyResult != null,
+
+                    // Map related collections
+                    Contacts = c.Contacts?.Select(c1 => new ContactDto
                     {
-                        Id = c.Id,
-                        Name = c.Name,
-                        JobTitle = c.JobTitle,
-                        Email = c.Email,
-                        Phone = c.Phone,
-                        CompanyId = c.CompanyId
+                        Id = c1.Id,
+                        Name = c1.Name,
+                        JobTitle = c1.JobTitle,
+                        Email = c1.Email,
+                        Phone = c1.Phone,
+                        CompanyId = c1.CompanyId
                     }).ToList(),
-                    Notes = company.Notes?.Select(n => new NoteDto
+
+                    Notes = c.Notes?.Select(n => new NoteDto
                     {
                         Id = n.Id,
                         Title = n.Title,
@@ -106,7 +220,25 @@ namespace LeadManagerPro.Services
                         CompanyId = n.CompanyId
                     }).ToList()
                 };
-
+                if (insuredCompanyResult != null)
+                {
+                    companyDto.InsuredDetails = new InsuredCompanyDto
+                    {
+                        ID = insuredCompanyResult.ID,
+                        CompanyID = insuredCompanyResult.CompanyID,
+                        CompanyName = c.RegistrationName,
+                        StatusCode = insuredCompanyResult.StatusCode,
+                        SizeCode = insuredCompanyResult.SizeCode,
+                        InsuranceEntryDate = insuredCompanyResult.InsuranceEntryDate,
+                        OpeningEffecDate = insuredCompanyResult.OpeningEffecDate,
+                        ClosingEffecDate = insuredCompanyResult.ClosingEffecDate,
+                        OpeningRegDate = insuredCompanyResult.OpeningRegDate,
+                        ClosingRegDate = insuredCompanyResult.ClosingRegDate,
+                        OpeningRef = insuredCompanyResult.OpeningRef,
+                        ClosingRef = insuredCompanyResult.ClosingRef,
+                        ActiveFlag = insuredCompanyResult.ActiveFlag
+                    };
+                }
                 return companyDto;
             }
             catch (Exception ex)
@@ -115,66 +247,86 @@ namespace LeadManagerPro.Services
                 throw;
             }
         }
-
+        // In CompanyService.cs, update CreateCompanyAsync method:
         public async Task<CompanyDto> CreateCompanyAsync(CompanyDto companyDto)
         {
             try
             {
                 var company = new Company
                 {
-                    // ID is auto-generated, so we don't set it here
-                    Name = companyDto.Name, // This is required
-                    Industry = companyDto.Industry ?? string.Empty,
-                    Size = companyDto.Size ?? string.Empty,
-                    Location = companyDto.Location ?? string.Empty,
+                    // ID is auto-generated
+                    Id = await _poolService.GetNextIdAsync(IIdPoolService.IdPoolType.Company),
+                    RegistrationNumber = companyDto.RegistrationNumber, // This is required
+                    IdTypeCode = companyDto.IdTypeCode ?? 1,
+                    DunsNumber = companyDto.DunsNumber ?? string.Empty,
+                    VATNumber = companyDto.VATNumber ?? string.Empty,
+                    RegistrationName = companyDto.RegistrationName, // This is required
+                    TradeName = companyDto.TradeName ?? string.Empty,
+                    EnglishName = companyDto.EnglishName ?? string.Empty,
+                    CompanyStatusCode = companyDto.CompanyStatusCode ?? 0,
+                    BusinessFieldCode = companyDto.BusinessFieldCode ?? 0,
+                    EntityTypeCode = companyDto.EntityTypeCode ?? 0,
+                    FoundingYear = companyDto.FoundingYear ?? 0,
+                    CountryCode = companyDto.CountryCode ?? 0,
                     Website = companyDto.Website ?? string.Empty,
-                    Status = companyDto.Status ?? "Active",
                     StreetAddress = companyDto.StreetAddress ?? string.Empty,
-                    Suite = companyDto.Suite ?? string.Empty,
-                    City = companyDto.City ?? string.Empty, // Handle null City
+                    City = companyDto.City ?? string.Empty,
                     StateProvince = companyDto.StateProvince ?? string.Empty,
                     PostalCode = companyDto.PostalCode ?? string.Empty,
-                    Country = companyDto.Country ?? string.Empty,
-                    BillingStreet = companyDto.BillingStreet ?? string.Empty,
-                    BillingCity = companyDto.BillingCity ?? string.Empty,
-                    BillingPostalCode = companyDto.BillingPostalCode ?? string.Empty,
-                    LinkedInProfile = companyDto.LinkedInProfile ?? string.Empty,
-                    FoundingYear = companyDto.FoundingYear,
-                    Description = companyDto.Description ?? string.Empty,
-                    RegistrationNumber = companyDto.RegistrationNumber ?? string.Empty,  // Added field
-                    DunsNumber = companyDto.DunsNumber ?? string.Empty,                 // Added field
-
-                    CreatedAt = DateTime.UtcNow
+                    PhoneNumber = companyDto.PhoneNumber ?? string.Empty,
+                    MobileNumber = companyDto.MobileNumber ?? string.Empty,
+                    FaxNumber = companyDto.FaxNumber ?? string.Empty,
+                    EMailAddress = companyDto.EMailAddress ?? string.Empty,
+                    Remarks = companyDto.Remarks ?? string.Empty,
+                    LastReportDate = companyDto.LastReportDate,
+                    LastReportName = companyDto.LastReportName ?? string.Empty,
+                    OpeningEffectiveDate = companyDto.OpeningEffectiveDate ?? DateTime.Now.Date,
+                    ClosingEffectiveDate = companyDto.ClosingEffectiveDate ?? DateTime.MaxValue,
+                    OpeningRegDate = companyDto.OpeningRegDate ?? DateTime.UtcNow,
+                    ClosingRegDate = companyDto.ClosingRegDate ?? DateTime.MaxValue,
+                    OpeningRef = companyDto.OpeningRef ?? string.Empty,
+                    ClosingRef = companyDto.ClosingRef ?? string.Empty,
+                    IsActive = true
                 };
 
                 _context.Companies.Add(company);
                 await _context.SaveChangesAsync();
 
+                // Similar mapping for return DTO
                 var newCompanyDto = new CompanyDto
                 {
                     Id = company.Id,
-                    Name = company.Name,
-                    Industry = company.Industry,
-                    Size = company.Size,
-                    Location = company.Location,
+                    IdTypeCode = companyDto.IdTypeCode ?? 1,
+                    RegistrationNumber = company.RegistrationNumber,
+                    DunsNumber = company.DunsNumber,
+                    VATNumber = company.VATNumber,
+                    RegistrationName = company.RegistrationName,
+                    TradeName = company.TradeName,
+                    EnglishName = company.EnglishName,
+                    CompanyStatusCode = company.CompanyStatusCode,
+                    BusinessFieldCode = company.BusinessFieldCode,
+                    EntityTypeCode = company.EntityTypeCode,
+                    FoundingYear = company.FoundingYear,
+                    CountryCode = company.CountryCode,
                     Website = company.Website,
-                    Status = company.Status,
                     StreetAddress = company.StreetAddress,
-                    Suite = company.Suite,
                     City = company.City,
                     StateProvince = company.StateProvince,
                     PostalCode = company.PostalCode,
-                    Country = company.Country,
-                    BillingStreet = company.BillingStreet,
-                    BillingCity = company.BillingCity,
-                    BillingPostalCode = company.BillingPostalCode,
-                    LinkedInProfile = company.LinkedInProfile,
-                    FoundingYear = company.FoundingYear,
-                    Description = company.Description,
-                    RegistrationNumber = company.RegistrationNumber,  // Added field
-                    DunsNumber = company.DunsNumber,                 // Added field
-                    CreatedAt = company.CreatedAt,
-                    UpdatedAt = company.UpdatedAt
+                    PhoneNumber = company.PhoneNumber,
+                    MobileNumber = company.MobileNumber,
+                    FaxNumber = company.FaxNumber,
+                    EMailAddress = company.EMailAddress,
+                    Remarks = company.Remarks,
+                    LastReportDate = company.LastReportDate,
+                    LastReportName = company.LastReportName,
+                    OpeningEffectiveDate = company.OpeningEffectiveDate,
+                    ClosingEffectiveDate = company.ClosingEffectiveDate,
+                    OpeningRegDate = company.OpeningRegDate,
+                    ClosingRegDate = company.ClosingRegDate,
+                    OpeningRef = company.OpeningRef,
+                    ClosingRef = company.ClosingRef,
+                    IsActive = company.IsActive
                 };
 
                 return newCompanyDto;
@@ -185,7 +337,6 @@ namespace LeadManagerPro.Services
                 throw;
             }
         }
-
         public async Task UpdateCompanyAsync(int id, CompanyDto companyDto)
         {
             try
@@ -197,28 +348,35 @@ namespace LeadManagerPro.Services
                 }
 
                 // Update company properties
-                company.Name = companyDto.Name;
-                company.Industry = companyDto.Industry;
-                company.Size = companyDto.Size;
-                company.Location = companyDto.Location;
+                company.RegistrationNumber = companyDto.RegistrationNumber;
+                company.DunsNumber = companyDto.DunsNumber;
+                company.VATNumber = companyDto.VATNumber;
+                company.RegistrationName = companyDto.RegistrationName;
+                company.TradeName = companyDto.TradeName;
+                company.EnglishName = companyDto.EnglishName;
+                company.CompanyStatusCode = companyDto.CompanyStatusCode ?? 0;
+                company.BusinessFieldCode = companyDto.BusinessFieldCode ?? 0;
+                company.EntityTypeCode = companyDto.EntityTypeCode ?? 0;
+                company.FoundingYear = companyDto.FoundingYear ?? 0;
+                company.CountryCode = companyDto.CountryCode ?? 0;
                 company.Website = companyDto.Website;
-                company.Status = companyDto.Status;
                 company.StreetAddress = companyDto.StreetAddress;
-                company.Suite = companyDto.Suite;
                 company.City = companyDto.City;
                 company.StateProvince = companyDto.StateProvince;
                 company.PostalCode = companyDto.PostalCode;
-                company.Country = companyDto.Country;
-                company.BillingStreet = companyDto.BillingStreet;
-                company.BillingCity = companyDto.BillingCity;
-                company.BillingPostalCode = companyDto.BillingPostalCode;
-                company.LinkedInProfile = companyDto.LinkedInProfile;
-                company.FoundingYear = companyDto.FoundingYear;
-                company.Description = companyDto.Description;
-                company.RegistrationNumber = companyDto.RegistrationNumber;  // Added field
-                company.DunsNumber = companyDto.DunsNumber;                 // Added field
-
-                company.UpdatedAt = DateTime.UtcNow;
+                company.PhoneNumber = companyDto.PhoneNumber;
+                company.MobileNumber = companyDto.MobileNumber;
+                company.FaxNumber = companyDto.FaxNumber;
+                company.EMailAddress = companyDto.EMailAddress;
+                company.Remarks = companyDto.Remarks;
+                company.LastReportDate = companyDto.LastReportDate;
+                company.LastReportName = companyDto.LastReportName;
+                company.OpeningEffectiveDate = companyDto.OpeningEffectiveDate;
+                company.ClosingEffectiveDate = companyDto.ClosingEffectiveDate;
+                company.OpeningRegDate = companyDto.OpeningRegDate;
+                company.ClosingRegDate = companyDto.ClosingRegDate;
+                company.OpeningRef = companyDto.OpeningRef;
+                company.ClosingRef = companyDto.ClosingRef;
 
                 _context.Entry(company).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
@@ -229,7 +387,6 @@ namespace LeadManagerPro.Services
                 throw;
             }
         }
-
         public async Task DeleteCompanyAsync(int id)
         {
             try

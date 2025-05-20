@@ -1,8 +1,9 @@
 using API;
 using Base;
 using CompanyServices;
-using LeadManagerPro.Data;
-using LeadManagerPro.Services;
+using Interfaces;
+using ACIA.Data;
+using ACIA.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -49,6 +50,9 @@ builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
 builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<IInsuredCompanyService, InsuredCompanyService>();
+builder.Services.AddScoped<IIdPoolService, IdPoolService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>

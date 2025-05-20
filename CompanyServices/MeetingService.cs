@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LeadManagerPro.Data;
-using LeadManagerPro.DTOs;
-using LeadManagerPro.Models;
+using ACIA.Data;
+using ACIA.DTOs;
+using ACIA.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace LeadManagerPro.Services
+namespace ACIA.Services
 {
     public class MeetingService : IMeetingService
     {
@@ -34,7 +34,7 @@ namespace LeadManagerPro.Services
                         Title = m.Title,
                         Type = m.Type,
                         CompanyId = m.CompanyId,
-                        CompanyName = m.Company.Name,
+                        CompanyName = m.Company.RegistrationName,
                         Date = m.Date,
                         Time = m.Time,
                         Duration = m.Duration,
@@ -84,7 +84,7 @@ namespace LeadManagerPro.Services
                     Title = meeting.Title,
                     Type = meeting.Type,
                     CompanyId = meeting.CompanyId,
-                    CompanyName = meeting.Company.Name,
+                    CompanyName = meeting.Company.RegistrationName,
                     Date = meeting.Date,
                     Time = meeting.Time,
                     Duration = meeting.Duration,
@@ -157,7 +157,7 @@ namespace LeadManagerPro.Services
                     Title = meeting.Title,
                     Type = meeting.Type,
                     CompanyId = meeting.CompanyId,
-                    CompanyName = company.Name,
+                    CompanyName = company. RegistrationName,
                     Date = meeting.Date,
                     Time = meeting.Time,
                     Duration = meeting.Duration,
