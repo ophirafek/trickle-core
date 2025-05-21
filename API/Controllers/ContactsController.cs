@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ACIA.DTOs;
 using ACIA.Services;
@@ -42,9 +43,9 @@ namespace ACIA.Controllers
             }
         }
 
-        // PUT: api/Contacts/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateContact(int id, ContactUpdateDto contactDto)
+        // POST: api/Contacts
+        [HttpPost]
+        public async Task<ActionResult<ContactDto>> SaveContact(ContactDto contactDto)
         {
             try
             {
@@ -53,21 +54,26 @@ namespace ACIA.Controllers
                     return BadRequest(ModelState);
                 }
 
-                if (!await _contactService.ContactExistsAsync(id))
-                {
-                    return NotFound();
-                }
+                var savedContact = await _contactService.SaveContactAsync(contactDto);
 
-                await _contactService.UpdateContactAsync(id, contactDto);
-                return NoContent();
+                if (contactDto.Id == 0)
+                {
+                    // This was a create operation
+                    return CreatedAtAction(nameof(GetContact), new { id = savedContact.Id }, savedContact);
+                }
+                else
+                {
+                    // This was an update operation
+                    return Ok(savedContact);
+                }
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound();
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating contact with id {Id}", id);
+                _logger.LogError(ex, "Error occurred while saving contact");
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }

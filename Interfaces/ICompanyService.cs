@@ -13,7 +13,6 @@ namespace ACIA.Services
         Task UpdateCompanyAsync(int id, CompanyDto companyDto);
         Task DeleteCompanyAsync(int id);
         Task<bool> CompanyExistsAsync(int id);
-        Task<ContactDto> AddContactAsync(int companyId, ContactCreateDto contactDto);
         Task<NoteDto> AddNoteAsync(int companyId, NoteCreateDto noteDto);
     }
 }

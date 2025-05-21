@@ -74,40 +74,7 @@ namespace ACIA.DTOs
         public bool IsActive { get; set; }
     }
 
-    public class ContactDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string JobTitle { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public int CompanyId { get; set; }
-    }
-
-    public class ContactCreateDto
-    {
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
-
-        [StringLength(100)]
-        public string JobTitle { get; set; }
-
-        [StringLength(255)]
-        [EmailAddress]
-        public string Email { get; set; }
-
-        [StringLength(50)]
-        public string Phone { get; set; }
-
-        [Required]
-        public int CompanyId { get; set; }
-    }
-
-    public class ContactUpdateDto : ContactCreateDto
-    {
-        // Uses all properties from ContactCreateDto
-    }
+    
 
     public class NoteDto
     {

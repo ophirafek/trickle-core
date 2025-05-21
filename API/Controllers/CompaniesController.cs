@@ -16,12 +16,18 @@ namespace ACIA.Controllers
     {
         private readonly ICompanyService _companyService;
         private readonly IImportService _importService;
+        private readonly IContactService _contactService;
         private readonly ILogger<CompaniesController> _logger;
 
-        public CompaniesController(ICompanyService companyService, IImportService importService, ILogger<CompaniesController> logger)
+        public CompaniesController(
+            ICompanyService companyService,
+            IImportService importService,
+            IContactService contactService,
+            ILogger<CompaniesController> logger)
         {
             _companyService = companyService;
             _importService = importService;
+            _contactService = contactService;
             _logger = logger;
         }
 
@@ -138,9 +144,31 @@ namespace ACIA.Controllers
             }
         }
 
-        // POST: api/Companies/{companyId}/Contacts
+        // GET: api/Companies/{companyId}/contacts
+        [HttpGet("{companyId}/contacts")]
+        public async Task<ActionResult<IEnumerable<ContactDto>>> GetCompanyContacts(int companyId)
+        {
+            try
+            {
+                // Verify the company exists
+                if (!await _companyService.CompanyExistsAsync(companyId))
+                {
+                    return NotFound($"Company with ID {companyId} not found");
+                }
+
+                var contacts = await _contactService.GetContactsByCompanyAsync(companyId);
+                return Ok(contacts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting contacts for company {CompanyId}", companyId);
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        // POST: api/Companies/{companyId}/contacts
         [HttpPost("{companyId}/contacts")]
-        public async Task<ActionResult<ContactDto>> AddContact(int companyId, ContactCreateDto contactDto)
+        public async Task<ActionResult<ContactDto>> AddCompanyContact(int companyId, ContactDto contactDto)
         {
             try
             {
@@ -161,8 +189,11 @@ namespace ACIA.Controllers
                     contactDto.CompanyId = companyId;
                 }
 
-                var newContactDto = await _companyService.AddContactAsync(companyId, contactDto);
-                return CreatedAtAction(nameof(GetCompany), new { id = companyId }, newContactDto);
+                // Set ID to 0 to ensure it's treated as a new contact
+                contactDto.Id = 0;
+
+                var newContact = await _contactService.SaveContactAsync(contactDto);
+                return CreatedAtAction(nameof(GetCompanyContacts), new { companyId = companyId }, newContact);
             }
             catch (KeyNotFoundException ex)
             {
@@ -174,6 +205,7 @@ namespace ACIA.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+
         [HttpPost("import")]
         public async Task<ActionResult<IEnumerable<ImportResult>>> ImportCompanies(List<CompanyDto> companies)
         {
@@ -188,6 +220,7 @@ namespace ACIA.Controllers
                 return StatusCode(500, "An error occurred during import");
             }
         }
+
         // POST: api/Companies/{companyId}/Notes
         [HttpPost("{companyId}/notes")]
         public async Task<ActionResult<NoteDto>> AddNote(int companyId, NoteCreateDto noteDto)

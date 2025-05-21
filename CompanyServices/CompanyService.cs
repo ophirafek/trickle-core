@@ -88,17 +88,7 @@ namespace ACIA.Services
                             ClosingRef = c.ClosingRef,
                             IsInsured = insuredCompany != null,
 
-                            // Map related collections
-                            Contacts = c.Contacts?.Select(c1 => new ContactDto
-                            {
-                                Id = c1.Id,
-                                Name = c1.Name,
-                                JobTitle = c1.JobTitle,
-                                Email = c1.Email,
-                                Phone = c1.Phone,
-                                CompanyId = c1.CompanyId
-                            }).ToList(),
-
+                    
                             Notes = c.Notes?.Select(n => new NoteDto
                             {
                                 Id = n.Id,
@@ -201,15 +191,7 @@ namespace ACIA.Services
                     IsInsured = insuredCompanyResult != null,
 
                     // Map related collections
-                    Contacts = c.Contacts?.Select(c1 => new ContactDto
-                    {
-                        Id = c1.Id,
-                        Name = c1.Name,
-                        JobTitle = c1.JobTitle,
-                        Email = c1.Email,
-                        Phone = c1.Phone,
-                        CompanyId = c1.CompanyId
-                    }).ToList(),
+                 
 
                     Notes = c.Notes?.Select(n => new NoteDto
                     {
@@ -412,54 +394,7 @@ namespace ACIA.Services
             return await _context.Companies.AnyAsync(e => e.Id == id);
         }
 
-        public async Task<ContactDto> AddContactAsync(int companyId, ContactCreateDto contactDto)
-        {
-            try
-            {
-                // Ensure the company exists
-                var companyExists = await _context.Companies.AnyAsync(c => c.Id == companyId);
-                if (!companyExists)
-                {
-                    throw new KeyNotFoundException($"Company with ID {companyId} not found");
-                }
-
-                // Ensure the company ID in the DTO matches the route parameter
-                if (contactDto.CompanyId != companyId)
-                {
-                    contactDto.CompanyId = companyId;
-                }
-
-                var contact = new Contact
-                {
-                    Name = contactDto.Name,
-                    JobTitle = contactDto.JobTitle,
-                    Email = contactDto.Email,
-                    Phone = contactDto.Phone,
-                    CompanyId = contactDto.CompanyId
-                };
-
-                _context.Contacts.Add(contact);
-                await _context.SaveChangesAsync();
-
-                var newContactDto = new ContactDto
-                {
-                    Id = contact.Id,
-                    Name = contact.Name,
-                    JobTitle = contact.JobTitle,
-                    Email = contact.Email,
-                    Phone = contact.Phone,
-                    CompanyId = contact.CompanyId
-                };
-
-                return newContactDto;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while adding contact to company with id {CompanyId}", companyId);
-                throw;
-            }
-        }
-
+     
         public async Task<NoteDto> AddNoteAsync(int companyId, NoteCreateDto noteDto)
         {
             try
