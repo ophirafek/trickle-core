@@ -1,4 +1,4 @@
-﻿// CompanyServices/ImportService.cs
+﻿// CompanyServices/ImportService.cs - Updated for new lead structure
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +50,6 @@ namespace ACIA.Services
                     };
 
                     // Check if company exists by registration number
-                    // Assuming registration number is stored in a field; adjust as needed
                     var existingCompany = await _context.Companies
                         .FirstOrDefaultAsync(c => c.RegistrationNumber == companyDto.RegistrationNumber);
 
@@ -63,15 +62,17 @@ namespace ACIA.Services
                         var newCompanyDto = await _companyService.CreateCompanyAsync(companyDto);
                         companyId = newCompanyDto.Id;
 
+                        // Create lead using new structure
                         var leadCreateDto = new LeadCreateDto
                         {
-                            Title = companyDto.RegistrationName,
+                            LeadName = companyDto.RegistrationName, // Use LeadName instead of Title
                             CompanyId = companyId,
-                            Value = 0,
+                            StatusCode = "New",
+                            SalesGapValue = 0,
                             Probability = 0,
-                            Owner = "",
-                            Source = "Import",
-                            Description = ""
+                            LeadSourceCode = null, // Could map to a "Import" source code
+                            Notes = "Lead created from import",
+                            AdditionalInfo = "Imported company lead"
                         };
 
                         await _leadService.CreateLeadAsync(leadCreateDto);
@@ -82,24 +83,25 @@ namespace ACIA.Services
                     else
                     {
                         companyId = existingCompany.Id;
-                        
-                        // Check if lead exists for this company
+
+                        // Check if active lead exists for this company
                         var existingLeads = await _leadService.GetLeadsByCompanyAsync(companyId);
 
                         bool leadExists = existingLeads.Any();
 
                         if (!leadExists)
                         {
-                            // Create a new lead for existing company
+                            // Create a new lead for existing company using new structure
                             var leadCreateDto = new LeadCreateDto
                             {
-                                Title = companyDto.RegistrationName,
+                                LeadName = companyDto.RegistrationName, // Use LeadName instead of Title
                                 CompanyId = companyId,
-                                Value =  0,
+                                StatusCode = "New",
+                                SalesGapValue = 0,
                                 Probability = 0,
-                                Source = "Import",
-                                Owner = "",
-                                Description = ""
+                                LeadSourceCode = null, // Could map to a "Import" source code
+                                Notes = "Lead created from import for existing company",
+                                AdditionalInfo = "Imported lead for existing company"
                             };
 
                             await _leadService.CreateLeadAsync(leadCreateDto);

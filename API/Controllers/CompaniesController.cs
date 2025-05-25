@@ -1,5 +1,7 @@
-﻿using System;
+﻿// API/Controllers/CompaniesController.cs - Updated with Lead endpoints
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CompanyServices;
 using ACIA.DTOs;
@@ -17,17 +19,20 @@ namespace ACIA.Controllers
         private readonly ICompanyService _companyService;
         private readonly IImportService _importService;
         private readonly IContactService _contactService;
+        private readonly ILeadService _leadService;
         private readonly ILogger<CompaniesController> _logger;
 
         public CompaniesController(
             ICompanyService companyService,
             IImportService importService,
             IContactService contactService,
+            ILeadService leadService,
             ILogger<CompaniesController> logger)
         {
             _companyService = companyService;
             _importService = importService;
             _contactService = contactService;
+            _leadService = leadService;
             _logger = logger;
         }
 
@@ -206,6 +211,75 @@ namespace ACIA.Controllers
             }
         }
 
+        // GET: api/Companies/{companyId}/leads
+        [HttpGet("{companyId}/leads")]
+        public async Task<ActionResult<IEnumerable<LeadDto>>> GetCompanyLeads(int companyId)
+        {
+            try
+            {
+                // Verify the company exists
+                if (!await _companyService.CompanyExistsAsync(companyId))
+                {
+                    return NotFound($"Company with ID {companyId} not found");
+                }
+
+                var leads = await _leadService.GetLeadsByCompanyAsync(companyId);
+                return Ok(leads);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting leads for company {CompanyId}", companyId);
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        // POST: api/Companies/{companyId}/leads
+        [HttpPost("{companyId}/leads")]
+        public async Task<ActionResult<LeadDto>> AddCompanyLead(int companyId, LeadCreateDto leadDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Ensure the company exists
+                if (!await _companyService.CompanyExistsAsync(companyId))
+                {
+                    return NotFound($"Company with ID {companyId} not found");
+                }
+
+                // Ensure the company ID in the DTO matches the route parameter
+                if (leadDto.CompanyId != companyId)
+                {
+                    leadDto.CompanyId = companyId;
+                }
+
+                // Validate contact ID if provided (must belong to the same company)
+                if (leadDto.ContactId.HasValue)
+                {
+                    var contacts = await _contactService.GetContactsByCompanyAsync(companyId);
+                    if (!contacts.Any(c => c.Id == leadDto.ContactId.Value))
+                    {
+                        return BadRequest($"Contact with ID {leadDto.ContactId} does not belong to company {companyId}");
+                    }
+                }
+
+                var newLead = await _leadService.CreateLeadAsync(leadDto);
+                return CreatedAtAction(nameof(GetCompanyLeads), new { companyId = companyId }, newLead);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while adding lead to company with id {CompanyId}", companyId);
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
         [HttpPost("import")]
         public async Task<ActionResult<IEnumerable<ImportResult>>> ImportCompanies(List<CompanyDto> companies)
         {
@@ -221,7 +295,7 @@ namespace ACIA.Controllers
             }
         }
 
-        // POST: api/Companies/{companyId}/Notes
+        // POST: api/Companies/{companyId}/notes
         [HttpPost("{companyId}/notes")]
         public async Task<ActionResult<NoteDto>> AddNote(int companyId, NoteCreateDto noteDto)
         {
