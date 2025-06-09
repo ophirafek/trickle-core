@@ -36,8 +36,8 @@ namespace ACIA.Services
                  join insured in _context.InsuredCompanies
                      on company.Id equals (int)insured.CompanyID into insuredJoin
                  from insuredCompany in insuredJoin.DefaultIfEmpty()
-                 where company.IsActive &&
-                       company.OpeningEffectiveDate <= DateTime.UtcNow.Date && company.ClosingEffectiveDate > DateTime.UtcNow.Date &&
+                 where company.ActiveFlag &&
+                       company.OpeningEffecDate <= DateTime.UtcNow.Date && company.ClosingEffecDate > DateTime.UtcNow.Date &&
                        (insuredCompany == null || insuredCompany.ActiveFlag == 1)
                  select new
                  {
@@ -65,7 +65,7 @@ namespace ACIA.Services
                             EnglishName = c.EnglishName,
                             CompanyStatusCode = c.CompanyStatusCode,
                             BusinessFieldCode = c.BusinessFieldCode,
-                            EntityTypeCode = c.EntityTypeCode,
+                            EntityTypeCode = c.OrganizationTypeCode,
                             FoundingYear = c.FoundingYear,
                             CountryCode = c.CountryCode,
                             Website = c.Website,
@@ -80,8 +80,8 @@ namespace ACIA.Services
                             Remarks = c.Remarks,
                             LastReportDate = c.LastReportDate,
                             LastReportName = c.LastReportName,
-                            OpeningEffectiveDate = c.OpeningEffectiveDate,
-                            ClosingEffectiveDate = c.ClosingEffectiveDate,
+                            OpeningEffectiveDate = c.OpeningEffecDate,
+                            ClosingEffectiveDate = c.ClosingEffecDate,
                             OpeningRegDate = c.OpeningRegDate,
                             ClosingRegDate = c.ClosingRegDate,
                             OpeningRef = c.OpeningRef,
@@ -139,8 +139,8 @@ namespace ACIA.Services
                      on company.Id equals (int)insured.CompanyID into insuredJoin
                  from insuredCompany in insuredJoin.DefaultIfEmpty()
                  where company.Id == id &&
-                       company.IsActive &&
-                       company.OpeningEffectiveDate <= DateTime.UtcNow.Date && company.ClosingEffectiveDate > DateTime.UtcNow.Date &&
+                       company.ActiveFlag &&
+                       company.OpeningEffecDate <= DateTime.UtcNow.Date && company.ClosingEffecDate > DateTime.UtcNow.Date &&
                        (insuredCompany == null || insuredCompany.ActiveFlag == 1)
                  select new
                  {
@@ -167,7 +167,7 @@ namespace ACIA.Services
                     EnglishName = c.EnglishName,
                     CompanyStatusCode = c.CompanyStatusCode,
                     BusinessFieldCode = c.BusinessFieldCode,
-                    EntityTypeCode = c.EntityTypeCode,
+                    EntityTypeCode = c.OrganizationTypeCode,
                     FoundingYear = c.FoundingYear,
                     CountryCode = c.CountryCode,
                     Website = c.Website,
@@ -182,8 +182,8 @@ namespace ACIA.Services
                     Remarks = c.Remarks,
                     LastReportDate = c.LastReportDate,
                     LastReportName = c.LastReportName,
-                    OpeningEffectiveDate = c.OpeningEffectiveDate,
-                    ClosingEffectiveDate = c.ClosingEffectiveDate,
+                    OpeningEffectiveDate = c.OpeningEffecDate,
+                    ClosingEffectiveDate = c.ClosingEffecDate,
                     OpeningRegDate = c.OpeningRegDate,
                     ClosingRegDate = c.ClosingRegDate,
                     OpeningRef = c.OpeningRef,
@@ -247,7 +247,7 @@ namespace ACIA.Services
                     EnglishName = companyDto.EnglishName ?? string.Empty,
                     CompanyStatusCode = companyDto.CompanyStatusCode ?? 0,
                     BusinessFieldCode = companyDto.BusinessFieldCode ?? 0,
-                    EntityTypeCode = companyDto.EntityTypeCode ?? 0,
+                    OrganizationTypeCode = companyDto.EntityTypeCode ?? 0,
                     FoundingYear = companyDto.FoundingYear ?? 0,
                     CountryCode = companyDto.CountryCode ?? 0,
                     Website = companyDto.Website ?? string.Empty,
@@ -262,13 +262,13 @@ namespace ACIA.Services
                     Remarks = companyDto.Remarks ?? string.Empty,
                     LastReportDate = companyDto.LastReportDate,
                     LastReportName = companyDto.LastReportName ?? string.Empty,
-                    OpeningEffectiveDate = companyDto.OpeningEffectiveDate ?? DateTime.Now.Date,
-                    ClosingEffectiveDate = companyDto.ClosingEffectiveDate ?? DateTime.MaxValue,
+                    OpeningEffecDate = companyDto.OpeningEffectiveDate ?? DateTime.Now.Date,
+                    ClosingEffecDate = companyDto.ClosingEffectiveDate ?? DateTime.MaxValue,
                     OpeningRegDate = companyDto.OpeningRegDate ?? DateTime.UtcNow,
                     ClosingRegDate = companyDto.ClosingRegDate ?? DateTime.MaxValue,
                     OpeningRef = companyDto.OpeningRef ?? string.Empty,
                     ClosingRef = companyDto.ClosingRef ?? string.Empty,
-                    IsActive = true
+                    ActiveFlag = true
                 };
 
                 _context.Companies.Add(company);
@@ -287,7 +287,7 @@ namespace ACIA.Services
                     EnglishName = company.EnglishName,
                     CompanyStatusCode = company.CompanyStatusCode,
                     BusinessFieldCode = company.BusinessFieldCode,
-                    EntityTypeCode = company.EntityTypeCode,
+                    EntityTypeCode = company.OrganizationTypeCode,
                     FoundingYear = company.FoundingYear,
                     CountryCode = company.CountryCode,
                     Website = company.Website,
@@ -302,13 +302,13 @@ namespace ACIA.Services
                     Remarks = company.Remarks,
                     LastReportDate = company.LastReportDate,
                     LastReportName = company.LastReportName,
-                    OpeningEffectiveDate = company.OpeningEffectiveDate,
-                    ClosingEffectiveDate = company.ClosingEffectiveDate,
+                    OpeningEffectiveDate = company.OpeningEffecDate,
+                    ClosingEffectiveDate = company.ClosingEffecDate,
                     OpeningRegDate = company.OpeningRegDate,
                     ClosingRegDate = company.ClosingRegDate,
                     OpeningRef = company.OpeningRef,
                     ClosingRef = company.ClosingRef,
-                    IsActive = company.IsActive
+                    IsActive = company.ActiveFlag
                 };
 
                 return newCompanyDto;
@@ -338,7 +338,7 @@ namespace ACIA.Services
                 company.EnglishName = companyDto.EnglishName;
                 company.CompanyStatusCode = companyDto.CompanyStatusCode ?? 0;
                 company.BusinessFieldCode = companyDto.BusinessFieldCode ?? 0;
-                company.EntityTypeCode = companyDto.EntityTypeCode ?? 0;
+                company.OrganizationTypeCode = companyDto.EntityTypeCode ?? 0;
                 company.FoundingYear = companyDto.FoundingYear ?? 0;
                 company.CountryCode = companyDto.CountryCode ?? 0;
                 company.Website = companyDto.Website;
@@ -353,8 +353,8 @@ namespace ACIA.Services
                 company.Remarks = companyDto.Remarks;
                 company.LastReportDate = companyDto.LastReportDate;
                 company.LastReportName = companyDto.LastReportName;
-                company.OpeningEffectiveDate = companyDto.OpeningEffectiveDate;
-                company.ClosingEffectiveDate = companyDto.ClosingEffectiveDate;
+                company.OpeningEffecDate = companyDto.OpeningEffectiveDate;
+                company.ClosingEffecDate = companyDto.ClosingEffectiveDate;
                 company.OpeningRegDate = companyDto.OpeningRegDate;
                 company.ClosingRegDate = companyDto.ClosingRegDate;
                 company.OpeningRef = companyDto.OpeningRef;

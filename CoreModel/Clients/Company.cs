@@ -24,7 +24,7 @@ namespace ACIA.Models
         public string EnglishName { get; set; }
         public int CompanyStatusCode { get; set; }
         public int BusinessFieldCode { get; set; }
-        public int EntityTypeCode { get; set; }
+        public int OrganizationTypeCode { get; set; }
         public int? FoundingYear { get; set; }
         public int CountryCode { get; set; }
 
@@ -55,13 +55,13 @@ namespace ACIA.Models
         public DateTime? LastReportDate { get; set; }
         public string? LastReportName { get; set; }
 
-        public DateTime? OpeningEffectiveDate { get; set; }
-        public DateTime? ClosingEffectiveDate { get; set; }
+        public DateTime? OpeningEffecDate { get; set; }
+        public DateTime? ClosingEffecDate { get; set; }
         public DateTime? OpeningRegDate { get; set; }
         public DateTime? ClosingRegDate { get; set; }
         public string? OpeningRef { get; set; }
         public string? ClosingRef { get; set; }
-        public bool IsActive { get; set; } = true; // Default to true
+        public bool ActiveFlag { get; set; } = true; // Default to true
 
         // Navigation properties
         public ICollection<Contact> Contacts { get; set; }
